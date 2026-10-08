@@ -25,71 +25,67 @@ A >=90, B >=80, C >=70, D >=60, F <60. É uma rubrica local inspirada
 no Observatory; não equivale à nota oficial nem garante segurança do site.
 A análise de CSP neste MVP verifica presença, sem analisar suas diretivas.
 
-## Preparação da gravação
+## O que é o `demo_mvp.py`?
 
-Grave a tela e sua voz. Deixe o terminal com fonte grande e feche janelas
-que exibam informações pessoais. Faça um ensaio dos comandos abaixo antes.
-Duração sugerida pelo repositório: 5–10 minutos.
+É um arquivo auxiliar para executar o scanner em um cenário controlado,
+sem depender da internet. Ele importa a função `main()` de
+`http_headers_scanner.py`, que é o mesmo ponto de entrada usado ao analisar
+um site real.
+
+A biblioteca `respx` intercepta a requisição feita pelo `httpx` à URL
+fictícia `https://demo.test/` e entrega uma resposta HTTP 200 com os
+cabeçalhos definidos no arquivo. A partir daí, o scanner executa sua lógica
+normal: avalia cada cabeçalho, calcula a pontuação e a nota e monta a saída.
+A tabela e os resultados são calculados nessa execução; o arquivo de demo
+não contém uma tabela pronta para imprimir.
+
+Com `--weak`, a demo remove o CSP e muda o COOP para `unsafe-none` antes
+de entregar a resposta ao scanner. Essas mudanças fazem o resultado cair
+de A/100 para D/69 e geram recomendações. Você pode comparar os dois casos:
+
+```bash
+python demo_mvp.py
+python demo_mvp.py --weak
+```
+
+Essa execução demonstra a análise e a saída da ferramenta. A conexão com
+um servidor real e o TLS devem ser demonstrados usando
+`python http_headers_scanner.py https://SEU-SITE-AUTORIZADO`.
+
+Uma frase curta para explicar no vídeo: “Esse arquivo simula a resposta de
+um site e passa os cabeçalhos para o scanner real, que calcula a nota na
+hora. Se eu remover uma proteção, a nota cai e ele mostra a recomendação.”
+
+## Gravação — no máximo 1 minuto
+
+Deixe o terminal aberto na pasta do projeto, com fonte grande e a `.venv`
+ativada. Escolha uma URL sua ou autorizada e teste antes de gravar.
 
 ```bash
 cd /home/cuzo/Projetos/projects/Individual/Headers
 source .venv/bin/activate
 ```
 
-Se precisar preparar o ambiente em outra máquina: `uv sync --all-extras`.
-Os comandos a seguir usam a `.venv` ativada e dispensam o just.
+### Roteiro direto
 
-## Roteiro de vídeo (aproximadamente 8 minutos)
+- **0–10 segundos:** “Esse é o Headers, um scanner em Python que verifica
+  sete cabeçalhos de segurança de um site e dá uma nota com recomendações.”
+- **10–35 segundos:** execute o comando abaixo com a URL escolhida:
 
-1. **Contexto — 45 segundos.** Explique: “O projeto verifica cabeçalhos
-   de segurança HTTP. Cabeçalhos ausentes ou fracos podem reduzir proteções
-   do navegador. A ferramenta ajuda a identificar essas configurações.”
-2. **Construção — 1 minuto.** Abra `http_headers_scanner.py`. Mostre `RULES`,
-   `evaluate_header`, `scan` e `main`. Explique o fluxo: URL → requisição →
-   avaliação → pontuação → tabela ou JSON. Mostre a regra COOP adicionada.
-3. **Execução — 3 minutos.** Execute um comando por vez:
+  ```bash
+  python http_headers_scanner.py https://SEU-SITE-AUTORIZADO
+  ```
 
-   ```bash
-   python demo_mvp.py
-   python demo_mvp.py --verbose
-   python demo_mvp.py --json
-   python demo_mvp.py --weak
-   echo $?
-   ```
+  Enquanto roda: “Ele faz a requisição e verifica quais cabeçalhos estão
+  corretos, fracos ou ausentes.”
+- **35–50 segundos:** aponte a tabela, a nota e a pontuação. Diga: “Aqui está
+  o resultado da análise e, se houver problemas, ele sugere como corrigir.”
+- **50–60 segundos:** “Também tem saída JSON para automação e modo verbose
+  para ver os cabeçalhos recebidos. É isso, valeu!”
 
-   Diga explicitamente: “Esta primeira demonstração usa uma resposta HTTPS
-   simulada, para tornar os resultados reproduzíveis.” Mostre os sete
-   cabeçalhos, nota A/100 e COOP correto. No verbose, destaque `x-demo` antes
-   da tabela. No JSON, explique `score`, `grade` e `findings`. No cenário
-   fraco, destaque CSP ausente, COOP fraco, as recomendações e código 1.
-
-   Para a execução real pedida pelo padrão da demo, use um site seu ou
-   autorizado. Substitua a URL abaixo antes de executar:
-
-   ```bash
-   python http_headers_scanner.py https://SEU-SITE-AUTORIZADO --verbose
-   echo $?
-   ```
-
-   Explique que a nota depende da resposta atual do servidor; não prometa A.
-4. **Decisões — 1 minuto.** Explique por que as regras são dados e a avaliação
-   é separada da rede: novas regras são fáceis de adicionar e os testes ficam
-   independentes da disponibilidade de sites. Explique o peso maior de HSTS
-   e CSP e a normalização para 100. JSON serve para automações; verbose ajuda
-   a conferir os valores enviados pelo servidor.
-5. **Validação — 1 minuto.** Execute:
-
-   ```bash
-   python -m pytest -q
-   ruff check http_headers_scanner.py test_http_headers_scanner.py demo_mvp.py
-   mypy --strict http_headers_scanner.py
-   pylint http_headers_scanner.py
-   ```
-
-   Com just instalado, os atalhos são `just test` e `just lint`.
-6. **Aprendizado e próximos passos — 30 segundos.** Explique o que aprendeu
-   sobre HTTP, testes de rede simulada e CLI. Cite análise aprofundada de CSP
-   ou múltiplas URLs como extensões e V_Scanner como próximo projeto da trilha.
+Não precisa mostrar código, testes nem todas as flags nesse vídeo.
+Se preferir a demonstração offline, rode `python demo_mvp.py` e diga
+“Vou mostrar com uma resposta simulada”: o resultado será nota A, 100 pontos.
 
 ## Vídeo da entrega
 
